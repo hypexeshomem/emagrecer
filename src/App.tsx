@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Star, Shield, Gift, Clock, Users, TrendingUp, CheckCircle, AlertTriangle, Play } from 'lucide-react';
 
 function App() {
@@ -8,22 +8,27 @@ function App() {
   useEffect(() => {
     setIsVisible(true);
     
-    // Garantir que o script Wistia seja carregado
-    const script = document.createElement("script");
-    script.src = "https://fast.wistia.com/assets/external/E-v1.js";
-    script.async = true;
-    document.body.appendChild(script);
+    // Otimização: Carregar scripts Wistia apenas quando necessário
+    const loadWistiaScript = () => {
+      if (!window.Wistia) {
+        const script = document.createElement("script");
+        script.src = "https://fast.wistia.com/assets/external/E-v1.js";
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+    };
+
+    // Carregar com delay para não bloquear renderização inicial
+    const timer = setTimeout(loadWistiaScript, 100);
     
     return () => {
-      // Cleanup do script se necessário
-      const existingScript = document.querySelector('script[src="https://fast.wistia.com/assets/external/E-v1.js"]');
-      if (existingScript && existingScript !== script) {
-        existingScript.remove();
-      }
+      clearTimeout(timer);
     };
   }, []);
 
-  const beforeAfterImages = [
+  // Memoizar dados estáticos para otimização
+  const beforeAfterImages = useMemo(() => [
     {
       src: 'https://i.postimg.cc/W1jHs5bR/CONVERTER-1.webp',
       alt: 'Antes e Depois 1',
@@ -44,9 +49,9 @@ function App() {
       alt: 'Antes e Depois 4',
       result: 'Perdeu 4kg em 1 semana'
     }
-  ];
+  ], []);
 
-  const testimonials = [
+  const testimonials = useMemo(() => [
     {
       image: 'https://i.postimg.cc/CKrPHYCY/DEPOIMENTO-1.webp',
       text: 'Emagreci 6,4kg em 2 semanas! Nunca imaginei que o café seria meu maior aliado.',
@@ -62,22 +67,23 @@ function App() {
       text: 'Sem fome, sem ansiedade. Resultado real e rápido.',
       rating: 5
     }
-  ];
+  ], []);
 
-  const nextSlide = () => {
+  // Otimizar funções com useCallback
+  const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % beforeAfterImages.length);
-  };
+  }, [beforeAfterImages.length]);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + beforeAfterImages.length) % beforeAfterImages.length);
-  };
+  }, [beforeAfterImages.length]);
 
-  const scrollToOffer = () => {
+  const scrollToOffer = useCallback(() => {
     const offerSection = document.getElementById('oferta-principal');
     if (offerSection) {
       offerSection.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -147,6 +153,7 @@ function App() {
                         src={item.src} 
                         alt={item.alt} 
                         className="w-full h-auto rounded-xl mb-4 shadow-lg"
+                        loading="lazy"
                       />
                       <p className="text-yellow-500 font-bold text-lg">{item.result}</p>
                     </div>
@@ -158,6 +165,7 @@ function App() {
             <button 
               onClick={prevSlide}
               className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-orange-500 text-black p-3 rounded-full hover:bg-orange-600 transition-colors"
+              aria-label="Slide anterior"
             >
               <ChevronLeft size={24} />
             </button>
@@ -165,6 +173,7 @@ function App() {
             <button 
               onClick={nextSlide}
               className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-orange-500 text-black p-3 rounded-full hover:bg-orange-600 transition-colors"
+              aria-label="Próximo slide"
             >
               <ChevronRight size={24} />
             </button>
@@ -189,6 +198,7 @@ function App() {
               src="https://i.postimg.cc/C1WcXN6Q/mockup-jejumm-cafe-preto.webp" 
               alt="Mockup do Protocolo"
               className="w-full max-w-2xl mx-auto mb-12 rounded-2xl shadow-2xl"
+              loading="lazy"
             />
             
             <h2 className="text-4xl md:text-5xl font-black mb-12 text-white">
@@ -248,6 +258,7 @@ function App() {
                     src="https://i.postimg.cc/CxGdqxgB/expert-jejum-cafe.webp" 
                     alt="Dra. Especialista em Nutrição Funcional"
                     className="w-full max-w-md mx-auto rounded-2xl shadow-2xl"
+                    loading="lazy"
                   />
                   <div className="absolute -bottom-4 -right-4 bg-orange-500 text-black px-4 py-2 rounded-full font-bold text-sm">
                     +8 anos de experiência
@@ -411,6 +422,58 @@ function App() {
         </div>
       </section>
 
+      {/* SEÇÃO 10 - FAQ - MOVIDA PARA ANTES DA OFERTA */}
+      <section className="py-20 bg-gradient-to-br from-indigo-500/10 via-black to-cyan-500/10">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-16 text-white">
+            PERGUNTAS <span className="text-orange-500">FREQUENTES</span>
+          </h2>
+          
+          <div className="max-w-4xl mx-auto space-y-6">
+            {[
+              {
+                question: "Jejum com café preto é seguro?",
+                answer: "Sim, é um método natural usado há séculos. Sempre consulte um médico se tiver condições específicas."
+              },
+              {
+                question: "Posso tomar mais de uma xícara?",
+                answer: "O protocolo recomenda 1 xícara em jejum. Mais pode ser consumido durante o dia conforme tolerância."
+              },
+              {
+                question: "Posso adaptar o protocolo?",
+                answer: "Sim, o guia inclui adaptações para diferentes perfis e necessidades."
+              },
+              {
+                question: "Como acesso o material?",
+                answer: "Imediatamente após a compra, você recebe o acesso por email."
+              },
+              {
+                question: "Tem grupo de suporte?",
+                answer: "Sim, grupo exclusivo no WhatsApp para os primeiros 300 participantes."
+              },
+              {
+                question: "Funciona mesmo se eu não fizer dieta?",
+                answer: "O protocolo é focado no jejum com café. Não requer dieta restritiva."
+              }
+            ].map((item, index) => (
+              <div key={index} className="bg-gray-800 rounded-2xl p-6">
+                <h3 className="text-xl font-bold text-orange-500 mb-3">{item.question}</h3>
+                <p className="text-gray-300 text-lg">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <button 
+              onClick={scrollToOffer}
+              className="bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-indigo-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+            >
+              ✅ TODAS AS DÚVIDAS ESCLARECIDAS, QUERO COMPRAR ✅
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* SEÇÃO 7 - O QUE VOCÊ RECEBE + OFERTA PRINCIPAL */}
       <section id="oferta-principal" className="py-20 bg-gradient-to-br from-black via-gray-900 to-black">
         <div className="container mx-auto px-4">
@@ -419,6 +482,7 @@ function App() {
               src="https://i.postimg.cc/C1WcXN6Q/mockup-jejumm-cafe-preto.webp" 
               alt="Mockup do Protocolo"
               className="w-full max-w-2xl mx-auto mb-12 rounded-2xl shadow-2xl"
+              loading="lazy"
             />
             
             <h2 className="text-4xl md:text-5xl font-black mb-12 text-white">
@@ -448,6 +512,7 @@ function App() {
                 src="https://i.postimg.cc/sxP7D9wx/jejum-cafe-preto-semfundo.webp" 
                 alt="Mockup do Protocolo"
                 className="w-full max-w-2xl mx-auto mb-8 rounded-2xl shadow-2xl"
+                loading="lazy"
               />
               
               <h3 className="text-3xl md:text-4xl font-black mb-8 text-white">
@@ -513,44 +578,6 @@ function App() {
         </div>
       </section>
 
-      {/* SEÇÃO 4 - PROVAS SOCIAIS + AVALIAÇÕES */}
-      <section className="py-20 bg-gradient-to-br from-purple-500/10 via-black to-pink-500/10">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-black text-center mb-16 text-white">
-            VEJA O QUE <span className="text-orange-500">ELAS DIZEM</span>
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-800 rounded-2xl p-6 text-center hover:transform hover:scale-105 transition-all duration-300">
-                <img 
-                  src={testimonial.image} 
-                  alt={`Depoimento ${index + 1}`}
-                  className="w-full h-auto rounded-xl mb-4 shadow-lg"
-                />
-                <div className="flex justify-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-6 h-6 text-yellow-500 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-300 text-lg leading-relaxed">
-                  "{testimonial.text}"
-                </p>
-              </div>
-            ))}
-          </div>
-          
-          <div className="text-center mt-12">
-            <button 
-              onClick={scrollToOffer}
-              className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-pink-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
-            >
-              💬 QUERO SER A PRÓXIMA A DEPOIMENTAR 💬
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* SEÇÃO 9 - GARANTIA */}
       <section className="py-20 bg-gradient-to-br from-green-500/10 via-black to-blue-500/10">
         <div className="container mx-auto px-4">
@@ -608,43 +635,30 @@ function App() {
         </div>
       </section>
 
-      {/* SEÇÃO 10 - FAQ */}
-      <section className="py-20 bg-gray-900">
+      {/* SEÇÃO 4 - PROVAS SOCIAIS + AVALIAÇÕES - MOVIDA PARA DEPOIS DA GARANTIA */}
+      <section className="py-20 bg-gradient-to-br from-purple-500/10 via-black to-pink-500/10">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-black text-center mb-16 text-white">
-            PERGUNTAS <span className="text-orange-500">FREQUENTES</span>
+            VEJA O QUE <span className="text-orange-500">ELAS DIZEM</span>
           </h2>
           
-          <div className="max-w-4xl mx-auto space-y-6">
-            {[
-              {
-                question: "Jejum com café preto é seguro?",
-                answer: "Sim, é um método natural usado há séculos. Sempre consulte um médico se tiver condições específicas."
-              },
-              {
-                question: "Posso tomar mais de uma xícara?",
-                answer: "O protocolo recomenda 1 xícara em jejum. Mais pode ser consumido durante o dia conforme tolerância."
-              },
-              {
-                question: "Posso adaptar o protocolo?",
-                answer: "Sim, o guia inclui adaptações para diferentes perfis e necessidades."
-              },
-              {
-                question: "Como acesso o material?",
-                answer: "Imediatamente após a compra, você recebe o acesso por email."
-              },
-              {
-                question: "Tem grupo de suporte?",
-                answer: "Sim, grupo exclusivo no WhatsApp para os primeiros 300 participantes."
-              },
-              {
-                question: "Funciona mesmo se eu não fizer dieta?",
-                answer: "O protocolo é focado no jejum com café. Não requer dieta restritiva."
-              }
-            ].map((item, index) => (
-              <div key={index} className="bg-gray-800 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-orange-500 mb-3">{item.question}</h3>
-                <p className="text-gray-300 text-lg">{item.answer}</p>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-gray-800 rounded-2xl p-6 text-center hover:transform hover:scale-105 transition-all duration-300">
+                <img 
+                  src={testimonial.image} 
+                  alt={`Depoimento ${index + 1}`}
+                  className="w-full h-auto rounded-xl mb-4 shadow-lg"
+                  loading="lazy"
+                />
+                <div className="flex justify-center mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-6 h-6 text-yellow-500 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-300 text-lg leading-relaxed">
+                  "{testimonial.text}"
+                </p>
               </div>
             ))}
           </div>
@@ -652,9 +666,9 @@ function App() {
           <div className="text-center mt-12">
             <button 
               onClick={scrollToOffer}
-              className="bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-indigo-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+              className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-pink-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
             >
-              ✅ TODAS AS DÚVIDAS ESCLARECIDAS, QUERO COMPRAR ✅
+              💬 QUERO SER A PRÓXIMA A DEPOIMENTAR 💬
             </button>
           </div>
         </div>
