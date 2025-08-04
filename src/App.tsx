@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Star, Shield, Gift, Clock, Users, TrendingUp, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, Shield, Gift, Clock, Users, TrendingUp, CheckCircle, AlertTriangle, Play } from 'lucide-react';
 
 function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -7,6 +7,20 @@ function App() {
 
   useEffect(() => {
     setIsVisible(true);
+    
+    // Garantir que o script Wistia seja carregado
+    const script = document.createElement("script");
+    script.src = "https://fast.wistia.com/assets/external/E-v1.js";
+    script.async = true;
+    document.body.appendChild(script);
+    
+    return () => {
+      // Cleanup do script se necessário
+      const existingScript = document.querySelector('script[src="https://fast.wistia.com/assets/external/E-v1.js"]');
+      if (existingScript && existingScript !== script) {
+        existingScript.remove();
+      }
+    };
   }, []);
 
   const beforeAfterImages = [
@@ -58,13 +72,16 @@ function App() {
     setCurrentSlide((prev) => (prev - 1 + beforeAfterImages.length) % beforeAfterImages.length);
   };
 
-  const ScrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToOffer = () => {
+    const offerSection = document.getElementById('oferta-principal');
+    if (offerSection) {
+      offerSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* SEÇÃO 1 - HERO SECTION */}
+      {/* SEÇÃO 1 - HERO SECTION COM VSL */}
       <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-yellow-500/10"></div>
         
@@ -82,23 +99,33 @@ function App() {
             </p>
           </div>
 
+          {/* VSL WISTIA */}
           <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16 mb-12">
-            <div className="w-full max-w-3xl mx-auto">
-              <img 
-                src="https://i.postimg.cc/sX0kX7HY/jejum-cafe-preto.webp" 
-                alt="Jejum com Café Preto" 
-                className="w-full h-auto rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-300"
-              />
+            <div className="w-full max-w-4xl mx-auto">
+              <div className="relative bg-gray-800 rounded-2xl p-4 shadow-2xl">
+                <div className="wistia_responsive_padding" style={{paddingTop: '56.25%'}}>
+                  <div className="wistia_responsive_wrapper">
+                    <div className="wistia_embed wistia_async_gc9ywrd50y videoFoam=true" style={{height: '100%', width: '100%'}}>&nbsp;</div>
+                  </div>
+                </div>
+                <div className="absolute top-6 left-6 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                  🔴 AO VIVO
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="text-center">
             <button 
-              onClick={ScrollToTop}
+              onClick={scrollToOffer}
               className="bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-orange-600 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
             >
-              🔥 QUERO ACESSAR O PROTOCOLO AGORA 🔥
+              🔥 QUERO DESCOBRIR O PROTOCOLO AGORA 🔥
             </button>
+            <p className="text-sm text-gray-400 mt-4">
+              <Play className="w-4 h-4 inline mr-1" />
+              Assista ao vídeo completo acima
+            </p>
           </div>
         </div>
       </section>
@@ -142,6 +169,15 @@ function App() {
               <ChevronRight size={24} />
             </button>
           </div>
+          
+          <div className="text-center mt-12">
+            <button 
+              onClick={scrollToOffer}
+              className="bg-gradient-to-r from-green-500 to-blue-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+            >
+              💪 QUERO ESSES RESULTADOS TAMBÉM 💪
+            </button>
+          </div>
         </div>
       </section>
 
@@ -177,7 +213,7 @@ function App() {
               </p>
             </div>
             
-            <div className="bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-2xl p-8 md:p-12">
+            <div className="bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-2xl p-8 md:p-12 mb-12">
               <h3 className="text-3xl md:text-4xl font-black mb-8 text-yellow-500">A SOLUÇÃO:</h3>
               <p className="text-xl md:text-2xl leading-relaxed mb-6 text-white">
                 Um simples hábito pela manhã.
@@ -189,35 +225,13 @@ function App() {
                 É simples. É natural. E <span className="text-orange-500">FUNCIONA PRA CARALHO</span>.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SEÇÃO 4 - PROVAS SOCIAIS + AVALIAÇÕES */}
-      <section className="py-20 bg-gray-900">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-black text-center mb-16 text-white">
-            VEJA O QUE <span className="text-orange-500">ELAS DIZEM</span>
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-800 rounded-2xl p-6 text-center hover:transform hover:scale-105 transition-all duration-300">
-                <img 
-                  src={testimonial.image} 
-                  alt={`Depoimento ${index + 1}`}
-                  className="w-full h-auto rounded-xl mb-4 shadow-lg"
-                />
-                <div className="flex justify-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-6 h-6 text-yellow-500 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-300 text-lg leading-relaxed">
-                  "{testimonial.text}"
-                </p>
-              </div>
-            ))}
+            
+            <button 
+              onClick={scrollToOffer}
+              className="bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-orange-600 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+            >
+              ☕ QUERO COMEÇAR COM O CAFÉ PRETO HOJE ☕
+            </button>
           </div>
         </div>
       </section>
@@ -284,6 +298,15 @@ function App() {
                     </div>
                   </div>
                 </div>
+                
+                <div className="mt-8">
+                  <button 
+                    onClick={scrollToOffer}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black text-lg px-8 py-4 rounded-full hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+                  >
+                    👩‍⚕️ QUERO SEGUIR A ESPECIALISTA 👩‍⚕️
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -332,6 +355,15 @@ function App() {
               <p className="text-gray-300">1 corpo em transformação</p>
             </div>
           </div>
+          
+          <div className="text-center mt-12">
+            <button 
+              onClick={scrollToOffer}
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+            >
+              📊 QUERO FAZER PARTE DESSAS ESTATÍSTICAS 📊
+            </button>
+          </div>
         </div>
       </section>
 
@@ -367,11 +399,20 @@ function App() {
               </div>
             ))}
           </div>
+          
+          <div className="text-center mt-12">
+            <button 
+              onClick={scrollToOffer}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-blue-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+            >
+              ❓ TIREI MINHAS DÚVIDAS, QUERO COMEÇAR ❓
+            </button>
+          </div>
         </div>
       </section>
 
       {/* SEÇÃO 7 - O QUE VOCÊ RECEBE + OFERTA PRINCIPAL */}
-      <section className="py-20 bg-gradient-to-br from-black via-gray-900 to-black">
+      <section id="oferta-principal" className="py-20 bg-gradient-to-br from-black via-gray-900 to-black">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <img 
@@ -419,9 +460,14 @@ function App() {
                 <p className="text-xl text-gray-300">à vista ou 10x de R$8,03</p>
               </div>
               
-              <button className="bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-orange-600 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide">
+              <button className="bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-orange-600 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide mb-4">
                 🔥 QUERO EMAGRECER COM CAFÉ PRETO AGORA 🔥
               </button>
+              
+              <p className="text-sm text-gray-300">
+                <Shield className="w-4 h-4 inline mr-1" />
+                Compra 100% segura e protegida
+              </p>
             </div>
           </div>
         </div>
@@ -457,8 +503,49 @@ function App() {
           </div>
           
           <div className="text-center">
-            <button className="bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-orange-600 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide">
-              🔥 QUERO TUDO COM OS BÔNUS AGORA MESMO 🔥
+            <button 
+              onClick={scrollToOffer}
+              className="bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-orange-600 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+            >
+              🎁 QUERO TUDO COM OS BÔNUS AGORA MESMO 🎁
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* SEÇÃO 4 - PROVAS SOCIAIS + AVALIAÇÕES */}
+      <section className="py-20 bg-gradient-to-br from-purple-500/10 via-black to-pink-500/10">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-16 text-white">
+            VEJA O QUE <span className="text-orange-500">ELAS DIZEM</span>
+          </h2>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-gray-800 rounded-2xl p-6 text-center hover:transform hover:scale-105 transition-all duration-300">
+                <img 
+                  src={testimonial.image} 
+                  alt={`Depoimento ${index + 1}`}
+                  className="w-full h-auto rounded-xl mb-4 shadow-lg"
+                />
+                <div className="flex justify-center mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-6 h-6 text-yellow-500 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-300 text-lg leading-relaxed">
+                  "{testimonial.text}"
+                </p>
+              </div>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <button 
+              onClick={scrollToOffer}
+              className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-pink-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+            >
+              💬 QUERO SER A PRÓXIMA A DEPOIMENTAR 💬
             </button>
           </div>
         </div>
@@ -511,7 +598,10 @@ function App() {
               </div>
             </div>
             
-            <button className="bg-gradient-to-r from-green-500 to-blue-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide">
+            <button 
+              onClick={scrollToOffer}
+              className="bg-gradient-to-r from-green-500 to-blue-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+            >
               🔒 QUERO TESTAR SEM RISCO AGORA! 🔒
             </button>
           </div>
@@ -558,6 +648,15 @@ function App() {
               </div>
             ))}
           </div>
+          
+          <div className="text-center mt-12">
+            <button 
+              onClick={scrollToOffer}
+              className="bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-indigo-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide"
+            >
+              ✅ TODAS AS DÚVIDAS ESCLARECIDAS, QUERO COMPRAR ✅
+            </button>
+          </div>
         </div>
       </section>
 
@@ -594,7 +693,10 @@ function App() {
             </div>
             
             <div className="space-y-4">
-              <button className="bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-orange-600 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide w-full md:w-auto">
+              <button 
+                onClick={scrollToOffer}
+                className="bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-black text-lg md:text-xl px-8 py-4 rounded-full hover:from-orange-600 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl uppercase tracking-wide w-full md:w-auto"
+              >
                 🔥 SIM, EU QUERO ENTRAR AGORA E MUDAR MEU CORPO! 🔥
               </button>
               
